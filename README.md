@@ -10,12 +10,12 @@
 @IocBoot(scanBase = "xyz.stupidwolf.ioc")
 public class IocStart {
     public static void main(String[] args) { 
-        BeanFactory beanFactory = beanFactory = IocApplication.run(IocStart.class);
+        BeanFactory beanFactory = IocApplication.run(IocStart.class);
     }
 }
 ```
 
-- 通过`@Singleton`注解注册bean,具体如下:
+- 通过`@Singleton`注册bean,具体如下:
 ```java
 import javax.inject.Singleton;
 
@@ -26,9 +26,9 @@ public class SimpleBean {
     }
 }
 ```
-可以显示通过`@Name`注解指定具体bean注册到ioc容器上的名字,若不指定,则默认使用类名(第一个字母小写)
+可以显示通过`@Name`指定具体bean注册到ioc容器上的名字,若不指定,则默认使用类名(第一个字母小写)
 
-- 通过`@Inject`注解注入bean,当前支持属性注入以及构造方法注入的方式:
+- 通过`@Inject`注入bean,当前支持属性注入以及构造方法注入的方式:
 ```java
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -52,7 +52,7 @@ public class MixDependBean {
     }
 }
 ```
-其中,通过构造方法注入的参数，需要配套使用`@Named`注解.
+其中,通过构造方法注入的参数，需要配套使用`@Named`.
 
 - 已通过的测试场景:
     - 全部使用通过属性注入
