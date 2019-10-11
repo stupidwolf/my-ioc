@@ -1,6 +1,6 @@
-package xyz.stupidwolf.ioc.factory.support;
+package xyz.stupidwolf.ioc.factory;
 
-import xyz.stupidwolf.ioc.factory.config.BeanDefinition;
+import xyz.stupidwolf.ioc.factory.BeanDefinition;
 import xyz.stupidwolf.ioc.exception.BeanDefinitionStoreException;
 import xyz.stupidwolf.ioc.exception.NoSuchBeanDefinitionException;
 

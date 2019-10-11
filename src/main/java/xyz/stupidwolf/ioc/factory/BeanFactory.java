@@ -1,4 +1,4 @@
-package xyz.stupidwolf.ioc.factory.support;
+package xyz.stupidwolf.ioc.factory;
 
 import xyz.stupidwolf.ioc.exception.BeansException;
 
