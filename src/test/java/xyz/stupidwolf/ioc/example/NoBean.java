@@ -1,4 +1,4 @@
-package xyz.stupidwolf.ioc.examaple;
+package xyz.stupidwolf.ioc.example;
 
 public class NoBean {
     public void hello() {

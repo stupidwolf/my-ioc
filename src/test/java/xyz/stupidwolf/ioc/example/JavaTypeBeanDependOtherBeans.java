@@ -1,4 +1,4 @@
-package xyz.stupidwolf.ioc.examaple;
+package xyz.stupidwolf.ioc.example;
 
 public class JavaTypeBeanDependOtherBeans {
     private SimpleBean simpleBean;

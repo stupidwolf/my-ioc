@@ -1,4 +1,4 @@
-package xyz.stupidwolf.ioc.examaple;
+package xyz.stupidwolf.ioc.example;
 
 import xyz.stupidwolf.ioc.annotation.Bean;
 import xyz.stupidwolf.ioc.annotation.Configuration;

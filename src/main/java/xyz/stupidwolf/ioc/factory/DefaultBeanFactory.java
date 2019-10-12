@@ -108,10 +108,10 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
                     args = new Object[dependOns.size()];
                     int i = 0;
                     for (String dependBeanName : dependOns) {
-                        initializingBeanNames.add(beanName);
                         if (initializingBeanNames.contains(beanName)) {
                             throw new BeansException("circle depend happen when by java method way to inject bean: " + beanName);
                         }
+                        initializingBeanNames.add(beanName);
                         args[i ++] = getBean(dependBeanName, getBeanDefinition(dependBeanName).getBeanClass());
                         initializingBeanNames.remove(beanName);
                     }

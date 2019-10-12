@@ -1,4 +1,4 @@
-package xyz.stupidwolf.ioc.examaple;
+package xyz.stupidwolf.ioc.example;
 
 import javax.inject.Singleton;
 

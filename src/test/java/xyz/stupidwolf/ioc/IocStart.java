@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import xyz.stupidwolf.ioc.annotation.IocBoot;
 import xyz.stupidwolf.ioc.boot.IocApplication;
-import xyz.stupidwolf.ioc.examaple.*;
+import xyz.stupidwolf.ioc.example.*;
 import xyz.stupidwolf.ioc.exception.BeansException;
 import xyz.stupidwolf.ioc.factory.BeanFactory;
 
