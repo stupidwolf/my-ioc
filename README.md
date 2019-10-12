@@ -1,3 +1,5 @@
+[toc]
+
 ### 功能说明
 - 模仿Spring IOC实现的IOC容器，用于学习目的
 - 支持JSR-330标准，同时也提供了一些自定义的注解
@@ -56,8 +58,8 @@ public class ConfigurationBean {
 }
 ```
 
-#### 注入注解
-    当你的java对象被my-ioc容器管理时,容器会自动通过属性或者构造方法的方式帮你注入你所需要的bean,你只需要在需要注入的地方使用`@Inject`注解即可.当存在多个相同类型的`bean`实例时,需要使用`@Named`注解区分开
+#### 注入bean
+当你的java对象被my-ioc容器管理时,容器会自动通过属性或者构造方法的方式帮你注入你所需要的bean,你只需要在需要注入的地方使用`@Inject`注解即可.当存在多个相同类型的`bean`实例时,需要使用`@Named`注解区分开
 
 ```java
 import javax.inject.Inject;
