@@ -7,7 +7,8 @@
 
 ### 使用说明
 #### 初始化容器
-    使用`@IocBoot`注解初始化ioc容器,容器启动后能够自动扫描`scanBase`属性所指定包下符合条件所有使用了`@Singleton`,`Configuration`等注解,然后添加到ioc容器中
+使用`@IocBoot`注解初始化ioc容器,容器启动后能够自动扫描`scanBase`属性所指定包下符合条件所有使用了`@Singleton`,`Configuration`等注解,然后添加到ioc容器中
+
 ```java
 @IocBoot(scanBase = "xyz.stupidwolf.ioc")
 public class IocStart {
