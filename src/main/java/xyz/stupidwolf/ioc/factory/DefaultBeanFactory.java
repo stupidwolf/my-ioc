@@ -13,12 +13,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
     private final static Logger logger = LoggerFactory.getLogger(DefaultBeanFactory.class);
@@ -30,6 +30,9 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
 
     /** 已注册的单例bean,为了支持通过class type方式获取bean **/
     private final ConcurrentMap<Class<?>, Set<String>> singleBeanNamesByType = new ConcurrentHashMap<>();
+
+    /** 正在初始化中的bean, 用来检测在使用构造方法,普通java方法实例化bean时可能出现的循环依赖问题**/
+    private final Set<String> initializingBeanNames = new HashSet<>();
 
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
@@ -83,15 +86,49 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
                         if (allBeanInfoMap.containsKey(toSolveBean)) {
                             continue;
                         }
-                        if (toSolveBean.equals(beanName)) {
-                            throw new BeansException("circle depend happen when use constructor way to inject bean: " + beanName);
+                        if (initializingBeanNames.contains(beanName)) {
+                            throw new BeansException("circle depend happen when by constructor way to inject bean: " + beanName);
                         }
+                        initializingBeanNames.add(beanName);
                         args[i] = getBean(toSolveBean, beanDefinitionMap.get(toSolveBean).getBeanClass());
+                        initializingBeanNames.remove(beanName);
                     }
                     // 设置构造方法的具体入参
                     beanDefinition.setConstructorArgs(args);
                 }
+            } else if (beanDefinition.getConfigurationBeanName() != null) {
+                // 通过@Configuration注册的bean如何初始化?
+                Object configurationInstance = getBean(beanDefinition.getConfigurationBeanName(),
+                        getBeanDefinition(beanDefinition.getConfigurationBeanName()).getBeanClass());
+                Class configurationClazz = configurationInstance.getClass();
+                // 解决依赖问题
+                List<String> dependOns = beanDefinition.getDependBeanNames();
+                Object[] args = null;
+                if (dependOns != null && dependOns.size() > 0) {
+                    args = new Object[dependOns.size()];
+                    int i = 0;
+                    for (String dependBeanName : dependOns) {
+                        initializingBeanNames.add(beanName);
+                        if (initializingBeanNames.contains(beanName)) {
+                            throw new BeansException("circle depend happen when by java method way to inject bean: " + beanName);
+                        }
+                        args[i ++] = getBean(dependBeanName, getBeanDefinition(dependBeanName).getBeanClass());
+                        initializingBeanNames.remove(beanName);
+                    }
+                }
+                Method method = beanDefinition.getMethod();
+                try {
+                    Object beanInstance = method.invoke(configurationInstance, args);
+                    allBeanInfoMap.put(beanDefinition.getBeanName(), beanInstance);
+                    // 初始化bean完成,不需要再走下面的流程
+                    return (T)beanInstance;
+                } catch (IllegalAccessException e) {
+                    throw new BeansException("IllegalAccessException: fail to create bean by invoke method, ", e);
+                } catch (InvocationTargetException e) {
+                    throw new BeansException("InvocationTargetException: fail to create bean by invoke method, ", e);
+                }
             }
+
             instance = instantiationStrategy.instantiate(beanDefinition);
             allBeanInfoMap.put(beanDefinition.getBeanName(), instance);
             List<String> dependBeanNames = beanDefinition.getDependBeanNames();

@@ -1,6 +1,7 @@
 package xyz.stupidwolf.ioc.factory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class BeanDefinition {
@@ -19,6 +20,15 @@ public class BeanDefinition {
     private String[] constructorArgsBeanName;
 
     private Object[] constructorArgs;
+
+    private Method method;
+
+    private String[] methodArgsBeanName;
+
+    private Object[] methodArgs;
+
+    /** 仅当bean是通过@Configuration方式定义时才设置该属性的值 **/
+    private String configurationBeanName;
 
     public String getBeanName() {
         return beanName;
@@ -82,5 +92,37 @@ public class BeanDefinition {
 
     public void setConstructorArgs(Object[] constructorArgs) {
         this.constructorArgs = constructorArgs;
+    }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public void setMethod(Method method) {
+        this.method = method;
+    }
+
+    public String[] getMethodArgsBeanName() {
+        return methodArgsBeanName;
+    }
+
+    public void setMethodArgsBeanName(String[] methodArgsBeanName) {
+        this.methodArgsBeanName = methodArgsBeanName;
+    }
+
+    public Object[] getMethodArgs() {
+        return methodArgs;
+    }
+
+    public void setMethodArgs(Object[] methodArgs) {
+        this.methodArgs = methodArgs;
+    }
+
+    public String getConfigurationBeanName() {
+        return configurationBeanName;
+    }
+
+    public void setConfigurationBeanName(String configurationBeanName) {
+        this.configurationBeanName = configurationBeanName;
     }
 }

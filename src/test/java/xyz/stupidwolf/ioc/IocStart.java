@@ -79,12 +79,16 @@ public class IocStart {
             CircularDependBeanByConstructor circularDependBeanByConstructor = beanFactory.getBean("circularDependBeanByConstructor",
                     CircularDependBeanByConstructor.class);
             circularDependBeanByConstructor.hello();
+            Assert.fail("can't arrive here!");
         } catch (BeansException ex) {
             Assert.assertTrue("circle depend happen.", true);
         }
 
     }
 
+    /**
+     * 通过 class type方式注入单例bean
+     */
     @Test
     public void testInjectBeanByClassType() {
         SimpleBean simpleBean = beanFactory.getBean(SimpleBean.class);
@@ -92,13 +96,58 @@ public class IocStart {
         simpleBean.hello();
     }
 
+    /**
+     * 不存在bean
+     */
     @Test
-    public void testInjectBeanByClassTypeUnNormal() {
+    public void testInjectBeanByClassTypeNotFound() {
         try {
             beanFactory.getBean(NoBean.class);
             Assert.fail("the code should not run around here!");
         } catch (BeansException ex) {
             Assert.assertTrue(ex.getLocalizedMessage(), true);
+        }
+    }
+
+    /**
+     * java编程方式注册bean
+     */
+    @Test
+    public void testGetBeanFromConfigurationAnnotation() {
+        JavaTypeBean javaTypeBean1 = beanFactory.getBean("javaTypeBean1", JavaTypeBean.class);
+        JavaTypeBean javaTypeBean2 = beanFactory.getBean("javaTypeBean2", JavaTypeBean.class);
+        JavaTypeBean javaTypeBeanCustom = beanFactory.getBean("javaTypeBeanCustom", JavaTypeBean.class);
+        Assert.assertNotNull(javaTypeBean1);
+        Assert.assertNotNull(javaTypeBean2);
+        Assert.assertNotNull(javaTypeBeanCustom);
+
+        Assert.assertTrue(javaTypeBean1 != javaTypeBean2 && javaTypeBean2 != javaTypeBeanCustom);
+
+        javaTypeBean1.hello();
+        javaTypeBean2.hello();
+        javaTypeBeanCustom.hello();
+    }
+
+    /**
+     * java编程方式注册bean,方法参数存有其它bean的依赖
+     */
+    @Test
+    public void testGetBeanFromConfigurationAnnotationWithDependOtherBeans() {
+        JavaTypeBeanDependOtherBeans javaTypeBeanDependOtherBeans = beanFactory.getBean(JavaTypeBeanDependOtherBeans.class);
+        Assert.assertNotNull(javaTypeBeanDependOtherBeans);
+        javaTypeBeanDependOtherBeans.hello();
+    }
+
+    /**
+     * java编程方式注册bean,存有循环依赖
+     */
+    @Test
+    public void testGetBeanFromConfigurationAnnotationCircleEx() {
+        try {
+            JavaTypeBean javaTypeBean = beanFactory.getBean("javaTypeBeanCircle", JavaTypeBean.class);
+            Assert.fail("can not arrive hear!");
+        } catch (BeansException e) {
+            Assert.assertTrue("an bean exception", true);
         }
     }
 }
