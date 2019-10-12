@@ -2,6 +2,7 @@
 - 模仿Spring IOC实现的IOC容器，用于学习目的
 - 支持JSR-330标准，同时也提供了一些自定义的注解
 - 支持通过包扫描的方式注册bean，同时也支持通过Java的代码方式注册bean
+- 支持通过`bean name`或者`bean class type`方式获取bean
 
 
 ### 使用说明
@@ -54,15 +55,26 @@ public class MixDependBean {
 ```
 其中,通过构造方法注入的参数，需要配套使用`@Named`.
 
+- 通过`bean name`获取bean:
+```java
+// 方式1: 通过bean name 方式获取
+SimpleBean simpleBean = beanFactory.getBean("simpleBean", SimpleBean.class);
+simpleBean.hello();
+
+// 方式2: 通过class type 方式获取bean:
+SimpleBean simpleBean = beanFactory.getBean(SimpleBean.class);
+simpleBean.hello();
+```
+
 - 已通过的测试场景:
     - 全部使用通过属性注入
     - 全部使用构造方法注入
     - 混合使用属性和构造方法方式注入
     - 通过属性注入时,支持循环依赖注入
     - 通过构造方法注入时,若存在循环依赖,ioc容器能够识别,并抛出对应的异常信息
+   
 
 - 更多例子参考文件`src/test/java/xyz/stupidwolf/ioc/IocStart.java`
 
 
 - TODO 支持自定义注解`@Configuration`,`@Bean`等自定义注解
-- TODO 支持auto by class type方式注入bean

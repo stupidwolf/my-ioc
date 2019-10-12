@@ -14,7 +14,9 @@ import javax.inject.Named;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,6 +28,9 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
     /** 已注册的bean **/
     private final ConcurrentMap<String, Object> allBeanInfoMap = new ConcurrentHashMap<>();
 
+    /** 已注册的单例bean,为了支持通过class type方式获取bean **/
+    private final ConcurrentMap<Class<?>, Set<String>> singleBeanNamesByType = new ConcurrentHashMap<>();
+
     @Override
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
         Assert.notNull(beanName, "bean name can't been null");
@@ -35,6 +40,8 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
             throw new BeanDefinitionStoreException("repeat bean name: \"" + beanName + "\"");
         }
         beanDefinitionMap.put(beanName, beanDefinition);
+        singleBeanNamesByType.putIfAbsent(beanDefinition.getBeanClass(), new LinkedHashSet<>());
+        singleBeanNamesByType.get(beanDefinition.getBeanClass()).add(beanName);
     }
 
     @Override
@@ -43,7 +50,8 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
             throw new NoSuchBeanDefinitionException("bean name: " + beanName + " not found.");
         }
 
-        beanDefinitionMap.remove(beanName);
+        BeanDefinition beanDefinition = beanDefinitionMap.remove(beanName);
+        singleBeanNamesByType.get(beanDefinition.getBeanClass()).remove(beanName);
     }
 
     @Override
@@ -118,6 +126,19 @@ public class DefaultBeanFactory implements BeanFactory, BeanDefinitionRegistry {
 
         }
         return (T) allBeanInfoMap.get(beanName);
+    }
+
+    @Override
+    public <T> T getBean(Class<T> requireType) throws BeansException {
+        Set<String> beanNames = singleBeanNamesByType.get(requireType);
+        if (beanNames == null) {
+            throw new BeansException("not found bean type: [" + requireType + "], you can register a bean as this type.");
+        } else if (beanNames.size() > 1) {
+            throw new BeansException("found more than one bean of bean type [" + requireType
+                    + "], you may should index the exactly bean name use @Named annotation");
+        }
+        String beanName = beanNames.iterator().next();
+        return getBean(beanName, requireType);
     }
 
     private String getBeanName(Field field) {

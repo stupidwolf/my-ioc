@@ -84,4 +84,21 @@ public class IocStart {
         }
 
     }
+
+    @Test
+    public void testInjectBeanByClassType() {
+        SimpleBean simpleBean = beanFactory.getBean(SimpleBean.class);
+        Assert.assertNotNull(simpleBean);
+        simpleBean.hello();
+    }
+
+    @Test
+    public void testInjectBeanByClassTypeUnNormal() {
+        try {
+            beanFactory.getBean(NoBean.class);
+            Assert.fail("the code should not run around here!");
+        } catch (BeansException ex) {
+            Assert.assertTrue(ex.getLocalizedMessage(), true);
+        }
+    }
 }
