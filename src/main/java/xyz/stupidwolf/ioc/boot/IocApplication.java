@@ -6,9 +6,12 @@ import xyz.stupidwolf.ioc.annotation.IocBoot;
 import xyz.stupidwolf.ioc.context.ClassPathBeanDefinitionScanner;
 import xyz.stupidwolf.ioc.factory.BeanDefinition;
 import xyz.stupidwolf.ioc.factory.DefaultBeanFactory;
-import xyz.stupidwolf.ioc.util.StringUtils;
 
+import java.io.File;
+import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class IocApplication {
     private static final Logger logger = LoggerFactory.getLogger(IocApplication.class);
@@ -26,16 +29,38 @@ public class IocApplication {
             ClassPathBeanDefinitionScanner classPathBeanDefinitionScanner = new ClassPathBeanDefinitionScanner();
             IocBoot iocBootAnnotation = primarySource.getAnnotation(IocBoot.class);
             String scanBase = iocBootAnnotation.scanBase();
-            String baseScanPackage = ".";
-            if (StringUtils.isNotEmpty(scanBase)) {
-                baseScanPackage = scanBase;
+            if (scanBase.length() > 0) {
+                scanBase = File.separator + scanBase.replaceAll("\\.", File.separator);
             }
-            // 扫描指定包下包含的bean定义信息
-            List<BeanDefinition> beanDefinitions = classPathBeanDefinitionScanner.scan(baseScanPackage);
 
-            for (BeanDefinition beanDefinition : beanDefinitions) {
-                defaultBeanFactory.registerBeanDefinition(beanDefinition.getBeanName(), beanDefinition);
+            Set<String> scanPaths = new HashSet<>();
+            // 扫描使用了@IocBoot注解下class文件
+            URL url = primarySource.getResource(scanBase);
+            if (url == null) {
+                logger.warn("class dir: {} not exist!", scanBase);
+            } else {
+                scanPaths.add(primarySource.getResource(scanBase).getFile());
             }
+
+//            try {
+//                Enumeration<URL> urlEnumeration = primarySource.getClassLoader().getResources(scanBase);
+//                while (urlEnumeration.hasMoreElements()) {
+//                    scanPaths.add(urlEnumeration.nextElement().getPath());
+//                }
+//            } catch (IOException e) {
+//               // ignore
+//               logger.warn("get resource by class loader fail: ", e);
+//            }
+
+            for (String baseScanPackage : scanPaths) {
+                // 扫描指定包下包含的bean定义信息
+                logger.debug("scan bean definition at path: {}", baseScanPackage);
+                List<BeanDefinition> beanDefinitions = classPathBeanDefinitionScanner.scan(baseScanPackage);
+                for (BeanDefinition beanDefinition : beanDefinitions) {
+                    defaultBeanFactory.registerBeanDefinition(beanDefinition.getBeanName(), beanDefinition);
+                }
+            }
+
             // 实例化bean refresh
 
             // destroy

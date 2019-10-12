@@ -35,32 +35,13 @@ public class ClassPathBeanDefinitionScanner {
      * @throws BeansException bean ex
      */
     public List<BeanDefinition> scan(String basePackage) throws BeansException {
-        basePackage = basePackage.replaceAll("\\.", File.separator);
         return resolveBeanDefinitionsRecursively(basePackage);
     }
 
 
     public List<BeanDefinition> resolveBeanDefinitionsRecursively(String basePackage) throws BeansException {
         List<BeanDefinition> beanDefinitions = new LinkedList<>();
-        ClassLoader classLoader = getClassLoader();
-        Enumeration<URL> urlEnumeration;
-        try {
-            urlEnumeration = (classLoader != null ? classLoader.getResources("")
-                    : ClassLoader.getSystemResources(""));
-            while (urlEnumeration.hasMoreElements()) {
-                URL url = urlEnumeration.nextElement();
-                String filePath = url.getPath();
-                File scanDir = new File(filePath, basePackage);
-                // 将使用注解定义的class file添加进来
-                // class -> bean definition
-                if (scanDir.exists()) {
-                    resolveBeanDefinitionsRecursively(scanDir, beanDefinitions);
-                }
-            }
-        } catch (IOException e) {
-            throw new BeansException("I/O error happen when get class path: ", e);
-        }
-
+        resolveBeanDefinitionsRecursively(new File(basePackage), beanDefinitions);
         return beanDefinitions;
     }
 
@@ -258,10 +239,5 @@ public class ClassPathBeanDefinitionScanner {
             }
         }
         return beanDefinitions;
-    }
-
-    public ClassLoader getClassLoader() {
-        // XXX 以这种方式获取class path下的文件是否合适?
-        return this.getClass().getClassLoader();
     }
 }
